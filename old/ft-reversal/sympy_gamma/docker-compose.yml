@@ -1,0 +1,32 @@
+version: '3'
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: ./docker/app/Dockerfile
+    image: app
+    container_name: gamma_app
+    depends_on:
+      - datastore
+    volumes:
+      - ./app/:/usr/src/app/app/
+    ports:
+      - "8080:8080"
+      - "8082:8082"
+      - "8083:8083"
+    environment:
+      - DATASTORE_EMULATOR_HOST=datastore:8081
+      - DATASTORE_USE_PROJECT_ID_AS_APP_ID=true
+      - PROJECT_ID=sympy-gamma-hrd
+      - GAE_VERSION=development
+    command: python manage.py runserver 0.0.0.0:8080
+
+  datastore:
+    image: google/cloud-sdk:latest
+    container_name: gamma_datastore
+    ports:
+      - "8081:8081"
+    environment:
+      - CLOUDSDK_CORE_PROJECT=sympy-live-hrd
+    command: gcloud beta emulators datastore start --host-port=0.0.0.0:8081

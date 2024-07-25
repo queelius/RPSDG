@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+{% load extra_tags %}
+{% block title %}
+SymPy Gamma
+{% endblock %}
+
+{% block content %}
+    <div class="input">
+        <h1><a href="/">
+                <img src="{{ MEDIA_URL }}images/logo.png"
+                     alt="SymPy Gamma logo" width="75" height="50" />
+                SymPy Gamma
+        </a></h1>
+        <form action="/input/" method="GET">
+            {{ form.i }}<input class="input_field" type="submit" value="=" />
+        </form>
+    </div>
+
+    <div class="main">
+        {% if history %}
+        <div class="col recent">
+            <h2>Recent queries</h2>
+            <button id="clear-all-recent">Clear All</button>
+            <ul>
+                {% for query in history %}
+                <li>
+                    <a href="{% make_query query.text %}">{{ query.text }}</a>
+                    <a href="/user/remove/{{query.key.urlsafe}}" class="remove">remove</a>
+                </li>
+                {% endfor %}
+            </ul>
+        </div>
+        {% endif %}
+        <div class="col example">
+            <h2>Examples</h2>
+            <a id="random-example" href="/random">Random Example</a>
+
+            {% for category in examples %}
+            <div class="example-group">
+            <i class="icon-angle-down"></i>
+              <h3> {{ category.0 }}</h3>
+
+              <div class="contents">
+                {% for subcategory in category.1 %}
+                  {% if subcategory.0 %}
+                  <h4>{{ subcategory.0 }}</h4>
+                  {% endif %}
+                  <ul>
+                    {% for example in subcategory.1 %}
+                    <li>{% make_example example %}</li>
+                    {% endfor %}
+                  </ul>
+                {% endfor %}
+              </div>
+
+            </div>
+            {% endfor %}
+
+            <p>… and more: see
+            the <a href="https://docs.sympy.org">documentation</a> to learn
+            about the full range of SymPy's capabilities.</p>
+        </div>
+    </div>
+{% endblock %}
