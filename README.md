@@ -1,3 +1,5 @@
+# Reverse-Process Synthetic Data Generation (RPSDG)
+
 Researchers in artificial intelligence and machine learning are seeking methods to enhance the problem-solving capabilities of Large Language Models (LLMs), particularly in domains requiring complex reasoning. We present **Reverse-Process Synthetic Data Generation** (RPSDG), a process-supervision approach to automatically generate training data for improving mathematical reasoning in LLMs.
 RPSDG addresses a fundamental challenge in AI training: the scarcity of high-quality, diverse data for complex problem-solving tasks.
 
