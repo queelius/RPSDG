@@ -1,0 +1,146 @@
+import itertools
+from collections import deque
+
+# Define labels for clarity
+LABELS = ['N', 'E', 'S', 'W']
+
+def rotate_switches(switches, rotation):
+    """
+    Rotate the switches by the given rotation index.
+    rotation=0: 0 degrees
+    rotation=1: 90 degrees clockwise
+    rotation=2: 180 degrees
+    rotation=3: 270 degrees
+    """
+    return switches[-rotation:] + switches[:-rotation]
+
+def all_up_or_down(switches):
+    """Check if all switches are either all up or all down."""
+    return all(state == 1 for state in switches) or all(state == 0 for state in switches)
+
+def set_any_two_adjacent(switches, value):
+    """
+    Set any two adjacent switches to the given value (0 or 1).
+    Since rotation is unknown, this function will attempt all possible adjacent pairs.
+    """
+    adjacent_pairs = [
+        (0, 1),  # N & E
+        (1, 2),  # E & S
+        (2, 3),  # S & W
+        (3, 0),  # W & N
+    ]
+    new_switches_list = []
+    for pair in adjacent_pairs:
+        new_switches = switches.copy()
+        new_switches[pair[0]] = value
+        new_switches[pair[1]] = value
+        new_switches_list.append(new_switches)
+    return new_switches_list
+
+def procedure_steps():
+    """
+    Define the revised procedure steps.
+    Step 1: Set any two adjacent to Up
+    Step 2: Set any two adjacent to Down
+    Step 3: Set any two adjacent to Up
+    Step 4: Set any two adjacent to Down
+    Step 5: Set any two adjacent to Up
+    """
+    return [
+        ('Up',),
+        ('Up',),
+        ('Up',),
+        ('Up',),
+        ('Up',),
+        #('Up',),
+        #('Down',),
+        #('Up',),
+        #('Down',),
+        #('Up',),
+    ]
+
+def generate_all_initial_states():
+    """Generate all possible initial switch states and rotations."""
+    switch_states = list(itertools.product([0, 1], repeat=4))  # 16 states
+    rotations = [0, 1, 2, 3]  # 4 possible rotations
+    return list(itertools.product(switch_states, rotations))  # 64 combinations
+
+def simulate_procedure():
+    """
+    Simulate the revised procedure for all initial states and rotations.
+    Returns True if the procedure works for all cases, False otherwise.
+    """
+    initial_states = generate_all_initial_states()
+    steps = procedure_steps()
+    
+    total_cases = len(initial_states)
+    success_cases = 0
+    failed_cases = []
+    
+    for idx, (initial_switches, initial_rotation) in enumerate(initial_states):
+        # Apply initial rotation
+        current_switches = rotate_switches(list(initial_switches), initial_rotation)
+        
+        # Initialize BFS queue
+        queue = deque()
+        # Each queue entry: (current_switches, step_number)
+        queue.append((current_switches, 0))
+        visited = set()
+        
+        success = False
+        
+        while queue:
+            switches, step = queue.popleft()
+            state_id = (tuple(switches), step)
+            
+            if state_id in visited:
+                continue
+            visited.add(state_id)
+            
+            # Check for uniformity
+            if all_up_or_down(switches):
+                success = True
+                break  # No need to proceed further for this case
+            
+            if step >= len(steps):
+                continue  # Exceeded step limit without success
+            
+            # Apply the current step
+            action = steps[step][0]  # 'Up' or 'Down'
+            value = 1 if action == 'Up' else 0
+            # Generate all possible outcomes by setting any two adjacent switches
+            possible_switches = set_any_two_adjacent(switches, value)
+            
+            for new_switches in possible_switches:
+                # After setting, if not uniform, pillar rotates randomly
+                if not all_up_or_down(new_switches):
+                    # Pillar can rotate to any of the four orientations
+                    for rotation in range(4):
+                        rotated_switches = rotate_switches(new_switches, rotation)
+                        queue.append((rotated_switches, step + 1))
+                else:
+                    # Uniformity achieved
+                    queue.append((new_switches, step + 1))
+        
+        if success:
+            success_cases += 1
+        else:
+            failed_cases.append((initial_switches, initial_rotation))
+            # For debugging purposes, you can print the failing cases
+            # print(f"Failed for initial switches: {initial_switches}, rotation: {initial_rotation * 90}°")
+    
+    # Summary
+    if not failed_cases:
+        print("Procedure SUCCEEDS for all initial states and rotations.")
+        return True
+    else:
+        print("Procedure FAILED for some initial states and rotations.")
+        print(f"Total Failed Cases: {len(failed_cases)} out of {total_cases}")
+        # Optionally, list the failed cases
+        # for switches, rotation in failed_cases:
+        #     switch_states = ''.join(['U' if s else 'D' for s in switches])
+        #     print(f"Switches: {switch_states}, Rotation: {rotation * 90}°")
+        return False
+
+if __name__ == "__main__":
+    simulate_procedure()

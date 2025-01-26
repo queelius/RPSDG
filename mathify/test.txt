@@ -1,0 +1,5 @@
+Solve the equation $x^2 + y^2 = z^2$ and simplify
+
+\[
+    \frac{\sqrt{\frac{a}{b \exp(xy)}}}{c + b}x.
+\]
